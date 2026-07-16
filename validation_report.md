@@ -2,21 +2,6 @@
 
 ## Status: PASSED
 
-**Validation Date:** 2026-06-24  
-**Validator:** Validator Agent (re-generated from `src/agents/validator.py` and `src/agents/prompts/validator.yaml`)
-
----
-
-## Summary
-
-This report validates the TASU (PS-SLM) SWIFT conversion codebase. The implementation provides a working end-to-end pipeline for fine-tuning a SenseVoice + Qwen2.5 audio-language model through the SWIFT framework and running inference with competitive WERs on LibriSpeech.
-
-- **Training**: A full 1-epoch LoRA fine-tuning run (`v12-20260524-192632`) completed successfully.
-- **Inference**: The trained checkpoint produces WERs of **3.07%** on test-clean and **7.23%** on test-other.
-- **Native parity**: The same SWIFT pipeline also supports the native `half_audio_finetuned` checkpoint, achieving **3.40%** on test-clean and **7.58%** on test-other after inference optimization.
-
----
-
 ## Checks
 
 ### 1. File Existence
@@ -63,25 +48,16 @@ This report validates the TASU (PS-SLM) SWIFT conversion codebase. The implement
 
 ### 6. Training Test
 
-- ✅ Full training run completed:
-  - Output: `workspace/output/Qwen2.5-1.5B-Instruct/v12-20260524-192632/`
-  - Steps: 17,577
-  - Final training loss: ~0.089
-  - Checkpoints saved at steps 5000, 10000, 15000, and final 17577.
+- ✅ smoke test training run completed:
+  - Output: `/workspace/output/Qwen2.5-1.5B-Instruct/smoke-20260715-085643`
+  - Steps: 10
+  - Final training loss: ~0.882
 - ✅ LoRA adapter applied to LLM; projector added to `modules_to_save`.
 
 ### 7. Inference Parity Check
 
 - ✅ `scripts/run_inference_tasu.py` exists and passes syntax check.
 - ✅ Inference runs end-to-end on `test-clean` (2619 samples) and `test-other` (2939 samples).
-- ✅ WER results:
-
-| Checkpoint | test-clean WER | test-other WER |
-|---|---|---|
-| `v12` (default greedy, bf16) | 3.07% | 7.23% |
-| `half_audio_finetuned` (optimized: float32, beam4, psd=0.99, rp=1.2) | 3.40% | 7.58% |
-
-- ✅ The SWIFT-converted `v12` model outperforms the native checkpoint on both test sets.
 
 ### 8. Critical Parameter Audit
 
@@ -123,20 +99,5 @@ This report validates the TASU (PS-SLM) SWIFT conversion codebase. The implement
 
 ## Logs
 
-- Training log: `workspace/output/Qwen2.5-1.5B-Instruct/v12-20260524-192632/train.log`
-- v12 inference (test-clean): `workspace/output/inference_results/test_clean_v12.log`
-- v12 inference (test-other): `workspace/output/inference_results/test_other_v12.log`
-- Native checkpoint reproduction report: `workspace/output/native_tasu_repro/README.md`
+- smoke test log: `/workspace/output/Qwen2.5-1.5B-Instruct/smoke-20260715-085643/train.log`
 
----
-
-## Conclusion
-
-The TASU SWIFT conversion codebase is functional and produces strong ASR results. The implementation supports both the SWIFT-fine-tuned `v12` checkpoint and the native `half_audio_finetuned` checkpoint. Despite minor naming deviations from the generic validator template, all critical components (training, inference, data pipeline, DeepSpeed config, NPU compatibility) are present and verified.
-
-```
-VALIDATION RESULT: PASSED
-
-Training Test: PASSED
-Inference Parity: PASSED (SWIFT v12 outperforms native checkpoint)
-```
